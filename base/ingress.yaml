@@ -1,0 +1,53 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: todolist-ingress
+  namespace: todolist
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/websocket-services: "todolist-backend-service"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - todo.nuhgnod.site
+    - www.todo.nuhgnod.site
+    secretName: todolist-frontend-tls
+  - hosts:
+    - api.todo.nuhgnod.site
+    secretName: todolist-backend-tls
+  rules:
+  - host: todo.nuhgnod.site
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: todolist-frontend-service
+            port:
+              number: 80
+  - host: www.todo.nuhgnod.site
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: todolist-frontend-service
+            port:
+              number: 80
+  - host: api.todo.nuhgnod.site
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: todolist-backend-service
+            port:
+              number: 8080
